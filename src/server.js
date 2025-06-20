@@ -1,26 +1,33 @@
+// src/server.js
+
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
 
-// Importe seu arquivo de rotas
 import routes from "./routes.js";
-
-// Importe e inicialize a conexão com o banco de dados
-// (Se você seguiu a estrutura do database/index.js)
 import "./database/index.js";
 
 const app = express();
 
-// Permite que o servidor entenda requisições com corpo em JSON
+// --- MELHORIA DE SEGURANÇA: Configuração do CORS ---
+// Define quais domínios podem aceder ao seu backend.
+// Em desenvolvimento, permite qualquer um. Em produção, apenas o seu frontend.
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.FRONTEND_URL // Uma variável de ambiente para o URL do seu frontend (ex: https://meu-app.vercel.app)
+      : "*", // Permite qualquer origem em desenvolvimento
+};
+
+app.use(cors(corsOptions));
+console.log(`CORS configurado para permitir origem: ${corsOptions.origin}`);
+// --- FIM DA MELHORIA ---
+
 app.use(express.json());
-
-// Permite que qualquer origem acesse sua API
-app.use(cors());
-
-// A LINHA MAIS IMPORTANTE: Conecta as rotas ao aplicativo
 app.use(routes);
 
 const PORT = process.env.PORT || 3333;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Backend rodando na porta ${PORT}`);
+  console.log(`🚀 Backend a rodar na porta ${PORT}`);
 });
