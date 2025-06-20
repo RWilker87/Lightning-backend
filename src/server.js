@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import "dotenv/config";
 
 // Importe seu arquivo de rotas
 import routes from "./routes.js";
@@ -19,7 +20,7 @@ app.use(cors());
 // A LINHA MAIS IMPORTANTE: Conecta as rotas ao aplicativo
 app.use(routes);
 
-const PORT = 3333;
+const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
   console.log(`🚀 Backend rodando na porta ${PORT}`);
 });
