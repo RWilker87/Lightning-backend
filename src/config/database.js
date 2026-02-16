@@ -11,9 +11,9 @@ export default {
     ssl:
       process.env.NODE_ENV === "production"
         ? {
-            require: true,
-            rejectUnauthorized: false,
-          }
+          require: true,
+          rejectUnauthorized: true,
+        }
         : false,
   },
 
