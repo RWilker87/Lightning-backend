@@ -1,5 +1,6 @@
+// src/config/auth.js
 
 export default {
-  secret: 'SEU_SEGREDO_SUPER_SECRETO_AQUI', 
-  expiresIn: '7d', // Token expira em 7 dias
+  secret: process.env.JWT_SECRET,
+  expiresIn: "1h",
 };
