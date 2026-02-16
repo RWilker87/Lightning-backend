@@ -71,7 +71,7 @@ class UserController {
       console.error("Erro no cadastro de utilizador:", err);
       return res
         .status(500)
-        .json({ error: "Falha interna ao criar conta.", details: err.message });
+        .json({ error: "Falha interna ao criar conta." });
     }
   }
 }
