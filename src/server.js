@@ -9,22 +9,27 @@ import "./database/index.js";
 
 const app = express();
 
-// --- MELHORIA DE SEGURANÇA: Configuração do CORS ---
-// Define quais domínios podem aceder ao seu backend.
-// Em desenvolvimento, permite qualquer um. Em produção, apenas o seu frontend.
+// --- Configuração do CORS ---
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? process.env.FRONTEND_URL // Uma variável de ambiente para o URL do seu frontend (ex: https://meu-app.vercel.app)
-      : "*", // Permite qualquer origem em desenvolvimento
+      ? process.env.FRONTEND_URL
+      : "*",
 };
 
 app.use(cors(corsOptions));
-console.log(`CORS configurado para permitir origem: ${corsOptions.origin}`);
-// --- FIM DA MELHORIA ---
-
 app.use(express.json());
 app.use(routes);
+
+// --- Error Handler Global ---
+// Captura erros não tratados nos controllers e middlewares.
+// Deve ser registado DEPOIS de todas as rotas.
+app.use((err, req, res, next) => {
+  console.error("Erro não tratado:", err.stack);
+  return res
+    .status(500)
+    .json({ error: "Erro interno do servidor." });
+});
 
 const PORT = process.env.PORT || 3333;
 
