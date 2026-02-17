@@ -1,26 +1,39 @@
-import "dotenv/config"; // Carrega as variáveis do ficheiro .env
+// src/config/database.js
 
-export default {
+import "dotenv/config";
+
+// DATABASE_URL → session pooler (porta 5432, IPv4 compatível)
+// DIRECT_URL  → conexão direta (somente IPv6 no plano Nano)
+const url = process.env.DATABASE_URL || process.env.DIRECT_URL;
+
+const requiresSSL =
+  process.env.NODE_ENV === "production" ||
+  (url && url.includes("supabase"));
+
+const databaseConfig = {
   dialect: "postgres",
-  url: process.env.DATABASE_URL, // Lê a URL completa a partir do ficheiro .env
+  url,
 
-  // Opções específicas para o dialeto PostgreSQL
   dialectOptions: {
-    // Em produção, o seu provedor de banco de dados (Supabase, Render, etc.)
-    // irá exigir uma conexão segura com SSL. Em ambiente local (Docker), não é necessário.
-    ssl:
-      process.env.NODE_ENV === "production"
-        ? {
-          require: true,
-          rejectUnauthorized: true,
-        }
-        : false,
+    ssl: requiresSSL
+      ? { require: true, rejectUnauthorized: false }
+      : false,
   },
 
-  // Configurações de padronização para todos os modelos (mantém como estava)
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+
   define: {
     timestamps: true,
     underscored: true,
     underscoredAll: true,
   },
+
+  logging: process.env.NODE_ENV === "production" ? false : console.log,
 };
+
+export default databaseConfig;

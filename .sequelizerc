@@ -1,9 +1,12 @@
 // .sequelizerc
+//
+// Configuração de caminhos para o sequelize-cli.
+// Aponta para o arquivo CommonJS (.cjs) porque o CLI não suporta ESM.
 
 const path = require("path");
 
 module.exports = {
-  config: path.resolve("src", "config", "database.js"),
+  config: path.resolve("src", "config", "database.cjs"),
   "models-path": path.resolve("src", "app", "models"),
   "seeders-path": path.resolve("src", "database", "seeders"),
   "migrations-path": path.resolve("src", "database", "migrations"),

@@ -1,8 +1,8 @@
 // src/database/index.js
+
 import Sequelize from "sequelize";
 import databaseConfig from "../config/database.js";
 
-// Importe todos os seus modelos aqui
 import User from "../app/models/User.js";
 import Tenant from "../app/models/Tenant.js";
 import License from "../app/models/License.js";
@@ -16,8 +16,18 @@ class Database {
   }
 
   init() {
-    // Esta é a instância da conexão do Sequelize
-    this.connection = new Sequelize(databaseConfig);
+    // Passa a URL como 1º argumento + config como opções.
+    // O Sequelize só reconhece a URL quando passada diretamente como string.
+    this.connection = new Sequelize(databaseConfig.url, databaseConfig);
+
+    this.connection
+      .authenticate()
+      .then(() =>
+        console.log("✅ Conexão com PostgreSQL (Supabase) estabelecida.")
+      )
+      .catch((err) =>
+        console.error("❌ Falha ao conectar ao PostgreSQL:", err.message)
+      );
 
     models
       .map((model) => model.init(this.connection))
@@ -29,6 +39,4 @@ class Database {
 
 const db = new Database();
 
-// MUDANÇA CRÍTICA: Exportamos a conexão diretamente.
-// Agora, qualquer ficheiro que importe este, receberá o objeto de conexão do Sequelize.
 export default db.connection;
