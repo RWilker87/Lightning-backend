@@ -20,19 +20,23 @@ const allowedOrigins = [
 ].filter(Boolean); // Remove valores undefined/null
 
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? (origin, callback) => {
-        // Permite requests sem origin (ex: mobile, Postman)
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Bloqueado pelo CORS."));
-        }
-      }
-      : "*",
+  origin: (origin, callback) => {
+    // Permite requests sem origin (Postman, mobile)
+    if (!origin) return callback(null, true);
+
+    // Em dev libera tudo
+    if (process.env.NODE_ENV !== "production") return callback(null, true);
+
+    // Em produção valida lista
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    return callback(new Error(`Bloqueado pelo CORS: ${origin}`));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+app.options("*", cors(corsOptions));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(routes);
