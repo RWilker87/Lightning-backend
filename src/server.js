@@ -13,10 +13,23 @@ import "./database/index.js";
 const app = express();
 
 // --- Configuração do CORS ---
+const allowedOrigins = [
+  process.env.FRONTEND_URL,        // URL de produção do frontend
+  "http://localhost:5173",          // Vite dev server
+  "http://localhost:3000",          // Next.js / CRA dev server
+].filter(Boolean); // Remove valores undefined/null
+
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? process.env.FRONTEND_URL
+      ? (origin, callback) => {
+        // Permite requests sem origin (ex: mobile, Postman)
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Bloqueado pelo CORS."));
+        }
+      }
       : "*",
 };
 

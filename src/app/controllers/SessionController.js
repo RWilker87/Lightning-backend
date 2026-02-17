@@ -29,13 +29,13 @@ class SessionController {
       return res.status(401).json({ error: "Utilizador ou senha inválidos." });
     }
 
-    const { id, name } = user;
+    const { id, name, is_admin } = user;
     const token = jwt.sign({ id }, authConfig.secret, {
       expiresIn: authConfig.expiresIn,
     });
 
     return res.json({
-      user: { id, name, email },
+      user: { id, name, email, is_admin },
       token,
     });
   }

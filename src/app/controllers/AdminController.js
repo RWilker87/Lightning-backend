@@ -36,9 +36,10 @@ class AdminController {
   // Adiciona dias a uma licença de um utilizador
   async updateLicense(req, res) {
     const { userId } = req.params;
-    const { daysToAdd } = req.body;
+    // Padrão: 7 dias se não for especificado
+    const daysToAdd = parseInt(req.body.daysToAdd, 10) || 7;
 
-    if (!daysToAdd || isNaN(daysToAdd) || daysToAdd <= 0) {
+    if (isNaN(daysToAdd) || daysToAdd <= 0) {
       return res.status(400).json({ error: "Número de dias inválido." });
     }
 
@@ -68,7 +69,7 @@ class AdminController {
       // Se ainda estiver válida, adiciona dias à data de expiração existente.
       const startDate = validUntil < today ? today : validUntil;
 
-      license.valid_until = addDays(startDate, parseInt(daysToAdd, 10));
+      license.valid_until = addDays(startDate, daysToAdd);
       license.active = true; // Garante que a licença seja reativada
       await license.save();
 
@@ -76,6 +77,40 @@ class AdminController {
     } catch (error) {
       console.error("Erro ao atualizar licença:", error);
       return res.status(500).json({ error: "Erro ao atualizar a licença." });
+    }
+  }
+
+  // Revoga a licença de um utilizador (desativa imediatamente)
+  async revokeLicense(req, res) {
+    const { userId } = req.params;
+
+    try {
+      const user = await User.findByPk(userId, {
+        include: { model: Tenant, as: "tenant" },
+      });
+      if (!user || !user.tenant_id) {
+        return res.status(404).json({ error: "Utilizador não encontrado." });
+      }
+
+      const license = await License.findOne({
+        where: { tenant_id: user.tenant_id },
+        order: [["created_at", "DESC"]],
+      });
+
+      if (!license) {
+        return res
+          .status(404)
+          .json({ error: "Licença não encontrada para este utilizador." });
+      }
+
+      license.active = false;
+      license.valid_until = new Date(); // Expira agora
+      await license.save();
+
+      return res.json({ message: "Licença revogada com sucesso.", license });
+    } catch (error) {
+      console.error("Erro ao revogar licença:", error);
+      return res.status(500).json({ error: "Erro ao revogar a licença." });
     }
   }
 }

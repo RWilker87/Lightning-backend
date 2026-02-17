@@ -7,13 +7,18 @@ export default async (req, res, next) => {
 
   try {
     const user = await User.findByPk(userId, {
-      attributes: ["tenant_id"],
+      attributes: ["tenant_id", "is_admin"],
       raw: true,
     });
     if (!user || !user.tenant_id) {
       return res
         .status(403)
         .json({ error: "Acesso proibido: Conta inválida." });
+    }
+
+    // Admin pula a verificação de licença — sempre tem acesso
+    if (user.is_admin) {
+      return next();
     }
 
     const license = await License.findOne({

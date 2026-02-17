@@ -58,5 +58,11 @@ routes.put(
   adminMiddleware,
   AdminController.updateLicense
 );
+routes.delete(
+  "/admin/licenses/:userId",
+  authMiddleware,
+  adminMiddleware,
+  AdminController.revokeLicense
+);
 
 export default routes;
